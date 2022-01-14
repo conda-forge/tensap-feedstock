@@ -7,8 +7,6 @@ package:
 source:
   url: https://github.com/anthony-nouy/tensap/archive/v{{ version }}.tar.gz
   sha256: 15983d4b8bad06e86ff9537d47922f46d0132aac12be8944d0ac82c030fe6fa9
-  patches:
-    - dim32.patch
 
 build:
   number: 0
