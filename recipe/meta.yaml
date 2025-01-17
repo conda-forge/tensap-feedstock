@@ -9,22 +9,24 @@ source:
   sha256: d32356441efcc65ccaab047948f4f398a08d589eddf095f6ea9156a19b56f36f
 
 build:
-  number: 0
+  number: 1
   noarch: python
   script:
     - {{ PYTHON }} -m pip install . -vv
 
 requirements:
   host:
-    - python >=3.6
+    - python {{ python_min }}
     - setuptools
     - pip
   run:
-    - python >=3.6
+    - python >={{ python_min }}
     - scipy
     - tensorflow >=2
 
 test:
+  requires:
+    - python {{ python_min }}
   imports:
     - tensap
 
