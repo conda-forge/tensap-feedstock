@@ -1,4 +1,4 @@
-{% set version = "1.6" %}
+{% set version = "1.8" %}
 
 package:
   name: tensap
@@ -6,10 +6,10 @@ package:
 
 source:
   url: https://github.com/anthony-nouy/tensap/archive/v{{ version }}.tar.gz
-  sha256: d32356441efcc65ccaab047948f4f398a08d589eddf095f6ea9156a19b56f36f
+  sha256: 96166ff194a739b066eb0c0dc6dd4c7d91ac4b09a0d7c98800ce26d56e6afaec
 
 build:
-  number: 1
+  number: 0
   noarch: python
   script:
     - {{ PYTHON }} -m pip install . -vv
