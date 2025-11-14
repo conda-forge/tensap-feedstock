@@ -22,7 +22,6 @@ requirements:
   run:
     - python >={{ python_min }}
     - scipy
-    - tensorflow >=2
 
 test:
   requires:
