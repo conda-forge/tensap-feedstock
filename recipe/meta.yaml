@@ -2,7 +2,7 @@
 
 package:
   name: tensap
-  version: {{ version }}
+  version: "{{ version }}"
 
 source:
   url: https://github.com/anthony-nouy/tensap/archive/v{{ version }}.tar.gz
