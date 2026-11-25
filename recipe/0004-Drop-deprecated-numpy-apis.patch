@@ -1,0 +1,223 @@
+From 52c17be93a414517f64808915c97bc42160b4173 Mon Sep 17 00:00:00 2001
+From: Julien Schueller <schueller@phimeca.com>
+Date: Sat, 29 Aug 2026 20:25:05 +0200
+Subject: [PATCH 4/4] Drop deprecated numpy apis
+
+---
+ .../learning/linear_model_learning_square_loss.py    |  2 +-
+ tensap/functions/functional_tensor.py                |  2 +-
+ tensap/functions/measures/lebesgue_measure.py        |  2 +-
+ tensap/functions/measures/random_variable.py         |  2 +-
+ tensap/functions/measures/random_vector.py           |  2 +-
+ .../functions/polynomials/orthonormal_polynomials.py |  2 +-
+ .../poincare_loss_vector_space_learning.py           | 12 ++++++------
+ tensap/poincare_learning/utils/_loss_vector_space.py |  6 +++---
+ tensap/poincare_learning/utils/_sklearn_wrapper.py   |  2 +-
+ tensap/tensor_algebra/tensors/tree_based_tensor.py   |  4 ++--
+ 10 files changed, 18 insertions(+), 18 deletions(-)
+
+diff --git a/tensap/approximation/learning/linear_model_learning_square_loss.py b/tensap/approximation/learning/linear_model_learning_square_loss.py
+index d5c355a..e9e9145 100644
+--- a/tensap/approximation/learning/linear_model_learning_square_loss.py
++++ b/tensap/approximation/learning/linear_model_learning_square_loss.py
+@@ -266,7 +266,7 @@ class LinearModelLearningSquareLoss(tensap.LinearModelLearning):
+         if (self.model_selection and np.linalg.norm(
+                 solpath) != 0) and solpath.shape[1] > 1:
+             if "non_zero_blocks" in self.options:
+-                rep = np.true(solpath.shape[1])
++                rep = np.ones(solpath.shape[1], dtype=bool)
+                 rep = np.logical_and(rep, np.any(solpath, 0))
+                 for block in self.options["non_zero_blocks"]:
+                     rep = np.logical_and(rep, np.any(solpath[block, :], 0))
+diff --git a/tensap/functions/functional_tensor.py b/tensap/functions/functional_tensor.py
+index 8f48b53..6202887 100644
+--- a/tensap/functions/functional_tensor.py
++++ b/tensap/functions/functional_tensor.py
+@@ -806,7 +806,7 @@ class FunctionalTensor(tensap.Function):
+             out = deepcopy(self)
+             out.tensor = self.tensor.tensor_matrix_product(H, dims)
+             out.bases = out.bases.remove_bases(dims)
+-            out.fdims = out.fdims[np.setdiff1d(np.range(np.size(out.fdims)), dims)]
++            out.fdims = out.fdims[np.setdiff1d(range(np.size(out.fdims)), dims)]
+             if np.size(out.fdims) == 0:
+                 out = out.tensor
+         return out
+diff --git a/tensap/functions/measures/lebesgue_measure.py b/tensap/functions/measures/lebesgue_measure.py
+index d74503c..68f7819 100644
+--- a/tensap/functions/measures/lebesgue_measure.py
++++ b/tensap/functions/measures/lebesgue_measure.py
+@@ -137,7 +137,7 @@ class LebesgueMeasure(tensap.Measure):
+                 is_equal = is_equal and (ind[0] == ind[1])
+         return is_equal
+ 
+-    def __neq__(self, L2):
++    def __ne__(self, L2):
+         return not (self == L2)
+ 
+     def mass(self):
+diff --git a/tensap/functions/measures/random_variable.py b/tensap/functions/measures/random_variable.py
+index 92a268e..5ecd530 100644
+--- a/tensap/functions/measures/random_variable.py
++++ b/tensap/functions/measures/random_variable.py
+@@ -78,7 +78,7 @@ class RandomVariable(tensap.ProbabilityMeasure):
+                 is_equal = is_equal and (ind[0] == ind[1])
+         return is_equal
+ 
+-    def __neq__(self, rv_2):
++    def __ne__(self, rv_2):
+         return not (self == rv_2)
+ 
+     def number_of_parameters(self):
+diff --git a/tensap/functions/measures/random_vector.py b/tensap/functions/measures/random_vector.py
+index 2b468e8..a090604 100644
+--- a/tensap/functions/measures/random_vector.py
++++ b/tensap/functions/measures/random_vector.py
+@@ -97,7 +97,7 @@ class RandomVector(tensap.ProbabilityMeasure):
+                 is_equal = is_equal and (ind[0] == ind[1])
+         return is_equal
+ 
+-    def __neq__(self, rv_2):
++    def __ne__(self, rv_2):
+         return not (self == rv_2)
+ 
+     def support(self):
+diff --git a/tensap/functions/polynomials/orthonormal_polynomials.py b/tensap/functions/polynomials/orthonormal_polynomials.py
+index 0eb3e3c..e97d9b4 100644
+--- a/tensap/functions/polynomials/orthonormal_polynomials.py
++++ b/tensap/functions/polynomials/orthonormal_polynomials.py
+@@ -632,7 +632,7 @@ class EmpiricalPolynomials(OrthonormalPolynomials):
+             self.measure = sample.get_standard_random_variable()
+         else:
+             # Standardization of the sample
+-            x = np.reshape(self.sample, [-1, 1])
++            x = np.reshape(sample, [-1, 1])
+             x = (x - np.tile(np.mean(x, 0), (x.shape[0], 1))) / np.tile(
+                 np.std(x, 0), (x.shape[0], 1)
+             )
+diff --git a/tensap/poincare_learning/poincare_loss_vector_space_learning.py b/tensap/poincare_learning/poincare_loss_vector_space_learning.py
+index 8a83477..e5f3a69 100644
+--- a/tensap/poincare_learning/poincare_loss_vector_space_learning.py
++++ b/tensap/poincare_learning/poincare_loss_vector_space_learning.py
+@@ -21,7 +21,7 @@ def _minimize_active_subspace(jac_u, jac_basis=None, m=1):
+         Has shape (N, n, d).
+     jac_basis : numpy.ndarray, optional
+         Has shape (N, d, d) or (d, d).
+-        The defatul is None
++        The default is None
+     m : int, optional
+         Number of singular vectors to take as features.
+         The default is 1.
+@@ -66,7 +66,7 @@ def _initialization(jac_u, jac_basis, m, init_method='active_subspace', n_try=1,
+         Has shape (N, n, d).
+     jac_basis : numpy.ndarray, optional
+         Has shape (N, d, d) or (d, d).
+-        The defatul is None
++        The default is None
+     m : int, optional
+         Number of singular vectors to take as features.
+         The default is 1.
+@@ -563,7 +563,7 @@ def _minimize_surrogate(jac_u, jac_basis, G0=None, R=None, m=1):
+         R = np.eye(K)
+ 
+     # Orthonormalize G0 if necessary
+-    if not (G0 is None):
++    if G0 is not None:
+         M = G0.T @ R @ G0
+         if np.linalg.norm(M - np.eye(M.shape[0])) > 1e-6:
+             G0 = G0 @ np.linalg.inv(np.linalg.cholesky(M).T)
+@@ -573,7 +573,7 @@ def _minimize_surrogate(jac_u, jac_basis, G0=None, R=None, m=1):
+     G = eigvec[:, :m]
+     surrogate = eigvals.min()
+ 
+-    if not (G0 is None):
++    if G0 is not None:
+         G = np.hstack([G0, G])
+ 
+     loss = poincare_loss_vector_space(G, jac_u, jac_basis)
+@@ -647,7 +647,7 @@ def _minimize_surrogate_greedy(jac_u, jac_basis, m_max, R=None, optimize_poincar
+     # Run minimization of Poincare loss if necessary
+     if optimize_poincare:
+         G, losses_optimized[0], _ = _minimize_pymanopt(jac_u, jac_basis, G, **pmo_kwargs)
+-        if not (R is None):
++        if R is not None:
+             G = G @ np.linalg.inv(np.linalg.cholesky(G.T @ R @ G).T)
+     else:
+         losses_optimized[0] = losses[0]
+@@ -668,7 +668,7 @@ def _minimize_surrogate_greedy(jac_u, jac_basis, m_max, R=None, optimize_poincar
+         # Run minimization of Poincare loss on all features if necessary
+         if optimize_poincare:
+             G, losses_optimized[j], _ = _minimize_pymanopt(jac_u, jac_basis, G, **pmo_kwargs)
+-            if not (R is None):
++            if R is not None:
+                 G = G @ np.linalg.inv(np.linalg.cholesky(G.T @ R @ G).T)
+         else:
+             losses_optimized[j] = losses[j]
+diff --git a/tensap/poincare_learning/utils/_loss_vector_space.py b/tensap/poincare_learning/utils/_loss_vector_space.py
+index 9cb0f00..7ad78c2 100644
+--- a/tensap/poincare_learning/utils/_loss_vector_space.py
++++ b/tensap/poincare_learning/utils/_loss_vector_space.py
+@@ -586,7 +586,7 @@ def poincare_loss_surrogate_vector_space(G, jac_u, jac_basis, G0=None, jac_g=Non
+     """
+     if jac_g is None:
+         jac_g = _eval_jac_g(G, jac_basis)
+-    if jac_g0 is None and not (G0 is None):
++    if jac_g0 is None and G0 is not None:
+         jac_g0 = _eval_jac_g(G0, jac_basis)
+     out = poincare_loss_surrogate(jac_u, jac_g, jac_g0)
+     return out
+@@ -640,7 +640,7 @@ def _eval_surrogate_matrices(jac_u, jac_basis, G0=None, R=None):
+ 
+     for jb, ju in zip(jac_basis, jac_u):
+ 
+-        if not (G0 is None):
++        if G0 is not None:
+             jg0 = G0.T @ jb
+             P_g0 = jg0.T @ scipy.linalg.pinv(jg0.T)
+ 
+@@ -655,7 +655,7 @@ def _eval_surrogate_matrices(jac_u, jac_basis, G0=None, R=None):
+         A += w * Ax / jac_u.shape[0]
+         B += w * Bx / jac_u.shape[0]
+ 
+-    if not (G0 is None):
++    if G0 is not None:
+         R12inv = np.linalg.inv(np.linalg.cholesky(R))
+         Minv = np.linalg.inv(G0.T @ R @ G0)
+         C = R @ G0 @ Minv @ G0.T @ R
+diff --git a/tensap/poincare_learning/utils/_sklearn_wrapper.py b/tensap/poincare_learning/utils/_sklearn_wrapper.py
+index 220eb2e..dfd376f 100644
+--- a/tensap/poincare_learning/utils/_sklearn_wrapper.py
++++ b/tensap/poincare_learning/utils/_sklearn_wrapper.py
+@@ -62,7 +62,7 @@ class PolynomialFeatureEstimator(BaseEstimator):
+         self.G = np.zeros((self.basis.cardinal(), 1))
+         self.g = SubFunctionalBasis(self.basis, self.G)
+ 
+-        # Compute the inner pdocut matrix if necessary
++        # Compute the inner product matrix if necessary
+         if self.innerp == "l2":
+             R = None
+         elif self.innerp == "h1_0":
+diff --git a/tensap/tensor_algebra/tensors/tree_based_tensor.py b/tensap/tensor_algebra/tensors/tree_based_tensor.py
+index 62c5882..a6682ad 100644
+--- a/tensap/tensor_algebra/tensors/tree_based_tensor.py
++++ b/tensap/tensor_algebra/tensors/tree_based_tensor.py
+@@ -2501,7 +2501,7 @@ class TreeBasedTensor:
+         else:
+             ranks = np.atleast_1d(ranks)
+ 
+-        ranks = np.int_(ranks)
++        ranks = ranks.astype(int)
+ 
+         if ranks.size == 1:
+             ranks = np.tile(ranks, tree.nb_nodes)
+@@ -2513,7 +2513,7 @@ class TreeBasedTensor:
+         else:
+             shape = np.atleast_1d(shape)
+ 
+-        shape = np.int_(shape)
++        shape = shape.astype(int)
+ 
+         if is_active_node is None:
+             is_active_node = np.full(tree.nb_nodes, True)
+-- 
+2.43.0
+

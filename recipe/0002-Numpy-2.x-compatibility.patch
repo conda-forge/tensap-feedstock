@@ -1,0 +1,93 @@
+From b9c0a5d57f8f6fe51f9e5eab7a98638b1810c700 Mon Sep 17 00:00:00 2001
+From: Julien Schueller <schueller@phimeca.com>
+Date: Fri, 14 Aug 2026 14:46:40 +0200
+Subject: [PATCH 2/4] Numpy 2.x compatibility
+
+---
+ .../learning/linear_model_learning_density_l2.py              | 2 +-
+ tensap/functions/measures/random_variable.py                  | 2 +-
+ tensap/functions/polynomials/orthonormal_polynomials.py       | 2 +-
+ tensap/tensor_algebra/tensors/tree_based_tensor.py            | 4 ++--
+ .../tutorial_tensor_learning_tensorized_function_learning.py  | 4 ++--
+ 5 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/tensap/approximation/learning/linear_model_learning_density_l2.py b/tensap/approximation/learning/linear_model_learning_density_l2.py
+index 68a2af4..a882068 100644
+--- a/tensap/approximation/learning/linear_model_learning_density_l2.py
++++ b/tensap/approximation/learning/linear_model_learning_density_l2.py
+@@ -167,7 +167,7 @@ class LinearModelLearningDensityL2(tensap.LinearModelLearning):
+ 
+         if "included_coefficients" in self.regularization_options:
+             incl_coef = self.regularization_options["included_coefficients"]
+-            list_sort = list_sort[np.logical_not(np.in1d(list_sort, incl_coef))]
++            list_sort = list_sort[np.logical_not(np.isin(list_sort, incl_coef))]
+ 
+             sol_incl_coef = np.array(sol_standard)
+             sol_incl_coef[np.setdiff1d(range(len(sol_incl_coef)), incl_coef)] = 0
+diff --git a/tensap/functions/measures/random_variable.py b/tensap/functions/measures/random_variable.py
+index 5a6eb9f..92a268e 100644
+--- a/tensap/functions/measures/random_variable.py
++++ b/tensap/functions/measures/random_variable.py
+@@ -277,7 +277,7 @@ class RandomVariable(tensap.ProbabilityMeasure):
+ 
+         # Quadrature points are the eigenvalues of the Jacobi matrix, weights
+         # are deduced from the eigenvectors
+-        eig_values, eig_vectors = np.linalg.eig(jacobi_matrix)
++        eig_values, eig_vectors = np.linalg.eigh(jacobi_matrix)
+         points = np.sort(eig_values)
+         ind = np.argsort(eig_values)
+         eig_vectors = eig_vectors[:, ind]
+diff --git a/tensap/functions/polynomials/orthonormal_polynomials.py b/tensap/functions/polynomials/orthonormal_polynomials.py
+index 0e19241..0eb3e3c 100644
+--- a/tensap/functions/polynomials/orthonormal_polynomials.py
++++ b/tensap/functions/polynomials/orthonormal_polynomials.py
+@@ -259,7 +259,7 @@ class OrthonormalPolynomials(tensap.UnivariatePolynomials):
+             jacobi_matrix = (
+                 np.diag(a) + np.diag(np.sqrt(b[1:]), -1) + np.diag(np.sqrt(b[1:]), 1)
+             )
+-        return np.sort(np.linalg.eig(jacobi_matrix)[0])
++        return np.sort(np.linalg.eigh(jacobi_matrix)[0])
+ 
+ 
+ class ShiftedOrthonormalPolynomials(tensap.UnivariatePolynomials):
+diff --git a/tensap/tensor_algebra/tensors/tree_based_tensor.py b/tensap/tensor_algebra/tensors/tree_based_tensor.py
+index 04074de..62c5882 100644
+--- a/tensap/tensor_algebra/tensors/tree_based_tensor.py
++++ b/tensap/tensor_algebra/tensors/tree_based_tensor.py
+@@ -723,7 +723,7 @@ class TreeBasedTensor:
+                 common_asc = tensap.fast_intersect(asc_alpha, asc_beta)
+                 gamma = common_asc[
+                     tree.level[common_asc - 1] == np.max(tree.level[common_asc - 1])
+-                ]
++                ][0]
+                 unique_asc = np.unique(np.concatenate((asc_alpha, asc_beta)))
+                 children = tensap.fast_setdiff(
+                     tree.children(
+@@ -881,7 +881,7 @@ class TreeBasedTensor:
+                     tensors[nod - 1] = []
+                     children = tree.children(nod)
+                     edges = np.concatenate(
+-                        (np.atleast_1d(children), edges[~np.in1d(edges, nod)])
++                        (np.atleast_1d(children), edges[~np.isin(edges, nod)])
+                     )
+ 
+             perm = np.arange(edges.size)
+diff --git a/tutorials/approximation/tutorial_tensor_learning_tensorized_function_learning.py b/tutorials/approximation/tutorial_tensor_learning_tensorized_function_learning.py
+index 94f3810..93f6897 100644
+--- a/tutorials/approximation/tutorial_tensor_learning_tensorized_function_learning.py
++++ b/tutorials/approximation/tutorial_tensor_learning_tensorized_function_learning.py
+@@ -193,9 +193,9 @@ LAMBDA_HAT, M_HAT, LAMBDA_PATH, M_PATH = SEL.slope_heuristic()
+ 
+ print(
+     "Model selected using a test sample:         %i, test error = %2.5e."
+-    % (OUTPUT["selected_model_number"], OUTPUT["test_error"])
++    % (np.ravel(OUTPUT["selected_model_number"])[0], OUTPUT["test_error"])
+ )
+ print(
+     "Model selected using the slope heuristic:   %i, test error = %2.5e."
+-    % (M_HAT, OUTPUT["test_error_iterations"][M_HAT])
++    % (np.ravel(M_HAT)[0], OUTPUT["test_error_iterations"][np.ravel(M_HAT)[0]])
+ )
+-- 
+2.43.0
+
