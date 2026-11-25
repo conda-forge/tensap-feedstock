@@ -7,9 +7,13 @@ package:
 source:
   url: https://github.com/anthony-nouy/tensap/archive/v{{ version }}.tar.gz
   sha256: 96166ff194a739b066eb0c0dc6dd4c7d91ac4b09a0d7c98800ce26d56e6afaec
+  patches:
+    - 0001-TF-2.x-optimizer-API-compatibility.patch
+    - 0002-Numpy-2.x-compatibility.patch
+    - 0004-Drop-deprecated-numpy-apis.patch
 
 build:
-  number: 0
+  number: 1
   noarch: python
   script:
     - {{ PYTHON }} -m pip install . -vv
